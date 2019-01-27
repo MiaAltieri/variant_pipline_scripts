@@ -100,6 +100,7 @@ case $i in
     gpu*)
     RUN="${i#*=}"
     shift 
+    ;;
     cpu*)
     RUN="${i#*=}"
     shift 
@@ -128,7 +129,7 @@ fi
 
 
 
-REF_NAME=${basename REF}
+REF_NAME=basename ${REF}
 FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/{REF_NAME}
 
 echo "Starting DeepVariant with the following settings"
@@ -146,15 +147,14 @@ echo "Threads     = ${N_SHARDS}"
 echo "GPU/CPU     = ${RUN}"
 
 
-
 mkdir -p ${OUTPUT_DIR}
 mkdir -p ${VCF_OUTPUT_DIR}
 mkdir -p ${LOGDIR}
 
 
-
 sudo docker pull gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION}
 wait;
+
 # create images
 time seq 0 $((N_SHARDS-1)) | \
   parallel --eta --halt 2 --joblog ${LOGDIR}/log --res ${LOGDIR} \
@@ -192,7 +192,7 @@ time sudo docker run \
    --outfile ${FINAL_OUTPUT_VCF}
 wait;
 
-# HAP.PY
+# HAP.PY code
 sudo docker pull pkrusche/hap.py
 TRUTH_VCF=/data/users/common/vcf/HG001_GRCh37.vcf.gz
 CONFIDENT_BED=/data/users/common/bed/HG001_GRCh37.bed
