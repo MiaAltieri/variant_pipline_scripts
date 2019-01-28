@@ -209,7 +209,7 @@ echo "============== 2 ============== "
 sudo docker pull pkrusche/hap.py
 TRUTH_VCF=/data/users/common/vcf/HG001_GRCh37.vcf.gz
 CONFIDENT_BED=/data/users/common/bed/HG001_GRCh37.bed
-HAPPY_OUTPUT=/data/users/kishwar/deepvariant_outputs/happy_output/pfda_hg001_grch37
+HAPPY_OUTPUT=/data/users/mgaltier/deepvariant_outputs/happy_output/pfda_hg001_grch37
 mkdir -p ${HAPPY_OUTPUT}
 echo "============== 2 end ============== "
 
