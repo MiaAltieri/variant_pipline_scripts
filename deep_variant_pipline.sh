@@ -134,18 +134,18 @@ REF_NAME="${basename ${REF}}"
 FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/{REF_NAME}
 
 echo "Starting DeepVariant with the following settings"
-echo "Bin version   = ${BIN_VERSION}"
-echo "Model version  = ${MODEL_VERSION}"
-echo "Output dir        = ${OUTPUT_DIR}"
-echo "VCF Output dir    = ${VCF_OUTPUT_DIR}"
+echo "Bin version      = ${BIN_VERSION}"
+echo "Model version    = ${MODEL_VERSION}"
+echo "Output dir         = ${OUTPUT_DIR}"
+echo "VCF Output dir      = ${VCF_OUTPUT_DIR}"
 echo "Final VCF Output dir    = ${FINAL_OUTPUT_VCF}"
-echo "Log dir    = ${LOGDIR}"
-echo "Region  = ${REGION}"
-echo "Reference   = ${REF}"
-echo "Bam     = ${BAM}"
-echo "Model     = ${MODEL}"
-echo "Threads     = ${N_SHARDS}"
-echo "GPU/CPU     = ${RUN}"
+echo "Log dir            = ${LOGDIR}"
+echo "Region            = ${REGION}"
+echo "Reference      = ${REF}"
+echo "Bam        = ${BAM}"
+echo "Model        = ${MODEL}"
+echo "Threads         = ${N_SHARDS}"
+echo "GPU/CPU        = ${RUN}"
 
 
 mkdir -p ${OUTPUT_DIR}
@@ -221,7 +221,7 @@ time sudo docker run -it -v /data/:/data/ \
   -f ${CONFIDENT_BED} \
   -r ${REF} \
   -o ${HAPPY_OUTPUT}/deepvariant_hg001_grch37 \
-  --regions "chr20:10,000,000-10,010,000" \
+   # --regions "chr20:10,000,000-10,010,000" \
   --engine=vcfeval \
   --threads=${N_SHARDS} \
   -l 19
