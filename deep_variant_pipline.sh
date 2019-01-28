@@ -30,7 +30,7 @@ case $i in
       model=<path_name> specifies model, .pkl file
       ref=<path_name> specifies reference, .fasta file
       bam=<path_name> specifies bam file, .bam file
-      sample-name=<string> specifies which sample
+      sample_name=<string> specifies which sample
 
     OPTIONAL:
     specify output directories
@@ -40,7 +40,7 @@ case $i in
           - defaults to \"0.7.2\"
       --output=<path_name> specifies the output directory 
           - defaults to ./friday_outputs
-      --output-vcf=<path_name> specifies the output directory for vcf file 
+      --output_vcf=<path_name> specifies the output directory for vcf file 
           - defaults to ./friday_outputs/vcf_output
       --log_dir=<path_name> specifies the log directory
           - defaults to ./deepvariant_outputs/logs
@@ -65,7 +65,7 @@ case $i in
     MODEL="${i#*=}"
     shift
     ;;
-    sample-name=*)
+    sample_name=*)
     SAMPLE_NAME="${i#*=}"
     shift
     ;;
@@ -81,7 +81,7 @@ case $i in
     OUTPUT_DIR="${i#*=}"
     shift
     ;;
-    --output-vcf=*)
+    --output_vcf=*)
     VCF_OUTPUT_DIR="${i#*=}"
     shift
     ;;
@@ -105,13 +105,12 @@ case $i in
     RUN="${i#*=}"
     shift 
     ;;
-    
     *)
     UNKNOWN="${i#*=}"
-    echo "unknown symbol ${UNKOWN}"
+    echo "unknown symbol ${UNKNOWN}"
     echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
-          [sample-name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
-          [--output=<path_name>] [--output-vcf=<path_name>] [--log_dir=<path_name>] 
+          [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
+          [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] 
           [--threads=<int>] [--region=<string>] [gpu || cpu]"
     exit 1
     ;;
@@ -123,8 +122,8 @@ if [ $REF == 'missing' ] || [ $BAM == 'missing' ] || [ $MODEL == 'missing' ]
 then
   echo "bam, ref, or model missing"
   echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
-    [sample-name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
-    [--output=<path_name>] [--output-vcf=<path_name>] [--log_dir=<path_name>] 
+    [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
+    [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] 
     [--threads=<int>] [--region=<string>] [gpu || cpu]"
   exit 1
 fi
