@@ -221,6 +221,7 @@ time sudo docker run -it -v /data/:/data/ \
   -o ${HAPPY_OUTPUT}/deepvariant_hg001_grch37 \
   --engine=vcfeval \
   --threads=${N_SHARDS} \
+  -l 20:10000000-10010000
   -l 19
 wait;
 echo "============== 3 end ============== "
