@@ -187,7 +187,6 @@ time sudo docker run \
   /opt/deepvariant/bin/call_variants \
  --outfile ${CALL_VARIANTS_OUTPUT} \
  --examples ${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz \
- # --regions "chr20:10,000,000-10,010,000" \
  --checkpoint ${MODEL}
 wait;
 echo "============== calling call variant output end ============== "
@@ -199,7 +198,6 @@ time sudo docker run \
    /opt/deepvariant/bin/postprocess_variants \
    --ref ${REF} \
    --infile ${CALL_VARIANTS_OUTPUT} \
-   # --regions "chr20:10,000,000-10,010,000" \
    --outfile ${FINAL_OUTPUT_VCF}
 wait;
 echo "============== 1 end ============== "
@@ -221,7 +219,6 @@ time sudo docker run -it -v /data/:/data/ \
   -f ${CONFIDENT_BED} \
   -r ${REF} \
   -o ${HAPPY_OUTPUT}/deepvariant_hg001_grch37 \
-   # --regions "chr20:10,000,000-10,010,000" \
   --engine=vcfeval \
   --threads=${N_SHARDS} \
   -l 19
