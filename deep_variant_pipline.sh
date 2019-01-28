@@ -172,7 +172,7 @@ time seq 0 $((N_SHARDS-1)) | \
     --reads ${BAM} \
     --sample_name ${SAMPLE_NAME} \
     --examples ${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz \
-    --regions "chr20:10,000,000-10,010,000" \
+    --regions '"chr20:10,000,000-10,010,000"' \
     --task {}
 wait;
 echo "============== create image end ============== "
