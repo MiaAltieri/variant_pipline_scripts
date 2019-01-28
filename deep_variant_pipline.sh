@@ -130,8 +130,8 @@ fi
 
 
 
-REF_NAME=basename ${REF}
-FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/{REF_NAME}
+# REF_NAME=basename ${REF}
+# FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/{REF_NAME}
 
 echo "Starting DeepVariant with the following settings"
 echo "Bin version   = ${BIN_VERSION}"
