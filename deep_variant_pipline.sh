@@ -107,7 +107,8 @@ case $i in
     ;;
     
     *)
-    echo "usage: deep_variant_pipeline [--help] model=<path_name> ref=<path_name> bam=<path_name>
+    echo "unknown symbol {i#*=}"
+    echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
           [sample-name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
           [--output=<path_name>] [--output-vcf=<path_name>] [--log_dir=<path_name>] 
           [--threads=<int>] [--region=<string>] [gpu || cpu]"
@@ -120,7 +121,7 @@ done
 if [ $REF == 'missing' ] || [ $BAM == 'missing' ] || [ $MODEL == 'missing' ]
 then
   echo "bam, ref, or model missing"
-  echo "usage: deep_variant_pipeline [--help] model=<path_name> ref=<path_name> bam=<path_name>
+  echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
     [sample-name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
     [--output=<path_name>] [--output-vcf=<path_name>] [--log_dir=<path_name>] 
     [--threads=<int>] [--region=<string>] [gpu || cpu]"
