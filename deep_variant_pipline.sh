@@ -89,7 +89,7 @@ case $i in
     LOGDIR="${i#*=}"
     shift
     ;;
-    threads=*)
+    --threads=*)
     N_SHARDS="${i#*=}"
     shift 
     ;;
