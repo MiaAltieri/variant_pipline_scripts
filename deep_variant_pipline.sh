@@ -153,13 +153,13 @@ mkdir -p ${VCF_OUTPUT_DIR}
 mkdir -p ${LOGDIR}
 
 
-echo "docker pull"
+echo "============== docker pull ============== "
 sudo docker pull gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION}
 wait;
-echo "docker pull end"
+echo "============== docker pull end ============== "
 
 
-echo "create image"
+echo "============== create image ============== "
 # create images
 time seq 0 $((N_SHARDS-1)) | \
   parallel --eta --halt 2 --joblog ${LOGDIR}/log --res ${LOGDIR} \
@@ -175,9 +175,9 @@ time seq 0 $((N_SHARDS-1)) | \
     --regions "chr20:10,000,000-10,010,000" \
     --task {}
 wait;
-echo "create image end"
+echo "============== create image end ============== "
 
-echo "calling call variant output"
+echo "============== calling call variant output ============== "
 CALL_VARIANTS_OUTPUT=${OUTPUT_DIR}/call_variants_output.tfrecord.gz
 wait;
 
@@ -190,9 +190,9 @@ time sudo docker run \
  # --regions "chr20:10,000,000-10,010,000" \
  --checkpoint ${MODEL}
 wait;
-echo "calling call variant output end"
+echo "============== calling call variant output end ============== "
 
-echo "1"
+echo "============== 1 ============== "
 time sudo docker run \
    -v /data/:/data/ \
    gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION} \
@@ -202,18 +202,18 @@ time sudo docker run \
    # --regions "chr20:10,000,000-10,010,000" \
    --outfile ${FINAL_OUTPUT_VCF}
 wait;
-echo "1 end"
+echo "============== 1 end ============== "
 
-echo "2"
+echo "============== 2 ============== "
 # HAP.PY code
 sudo docker pull pkrusche/hap.py
 TRUTH_VCF=/data/users/common/vcf/HG001_GRCh37.vcf.gz
 CONFIDENT_BED=/data/users/common/bed/HG001_GRCh37.bed
 HAPPY_OUTPUT=/data/users/kishwar/deepvariant_outputs/happy_output/pfda_hg001_grch37
 mkdir -p ${HAPPY_OUTPUT}
-echo "2 end"
+echo "============== 2 end ============== "
 
-echo "3"
+echo "============== 3 ============== "
 time sudo docker run -it -v /data/:/data/ \
   pkrusche/hap.py /opt/hap.py/bin/hap.py \
   ${TRUTH_VCF} \
@@ -226,4 +226,4 @@ time sudo docker run -it -v /data/:/data/ \
   --threads=${N_SHARDS} \
   -l 19
 wait;
-echo "3 end"
+echo "============== 3 end ============== "
