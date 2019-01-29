@@ -164,7 +164,7 @@ echo "============== create image ============== "
 time seq 0 $((N_SHARDS-1)) | \
   parallel --eta --halt 2 --joblog ${LOGDIR}/log --res ${LOGDIR} \
   sudo docker run \
-    -v /data/:/data/ \
+    -v  ${HOME}:${HOME}    \
     gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION} \
     /opt/deepvariant/bin/make_examples \
     --mode calling \
@@ -172,7 +172,7 @@ time seq 0 $((N_SHARDS-1)) | \
     --reads ${BAM} \
     --sample_name ${SAMPLE_NAME} \
     --examples ${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz \
-    --regions '"20:10,000,000-10,010,000"' \
+    --regions '"chr20:10,000,000-10,010,000"' \
     --task {}
 wait;
 echo "============== create image end ============== "
@@ -182,46 +182,24 @@ CALL_VARIANTS_OUTPUT=${OUTPUT_DIR}/call_variants_output.tfrecord.gz
 wait;
 
 time sudo docker run \
-  -v /data/:/data/ \
-  gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION} \
+  -v  ${HOME}:${HOME} \
+  gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
   /opt/deepvariant/bin/call_variants \
- --outfile ${CALL_VARIANTS_OUTPUT} \
- --examples ${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz \
- --checkpoint ${MODEL}
+ --outfile "${CALL_VARIANTS_OUTPUT}" \
+ --examples "${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz" \
+ --checkpoint "${MODEL}"
 wait;
 echo "============== calling call variant output end ============== "
 
 echo "============== 1 ============== "
 time sudo docker run \
-   -v /data/:/data/ \
-   gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION} \
+   -v  ${HOME}:${HOME} \
+   gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
    /opt/deepvariant/bin/postprocess_variants \
-   --ref ${REF} \
-   --infile ${CALL_VARIANTS_OUTPUT} \
-   --outfile ${FINAL_OUTPUT_VCF}
+   --ref "${REF}" \
+   --infile "${CALL_VARIANTS_OUTPUT}" \
+   --outfile $"{FINAL_OUTPUT_VCF}"
 wait;
 echo "============== 1 end ============== "
 
-echo "============== 2 ============== "
-# HAP.PY code
-sudo docker pull pkrusche/hap.py
-TRUTH_VCF=/data/users/common/vcf/HG001_GRCh37.vcf.gz
-CONFIDENT_BED=/data/users/common/bed/HG001_GRCh37.bed
-HAPPY_OUTPUT=/data/users/mgaltier/deepvariant_outputs/happy_output/pfda_hg001_grch37
-mkdir -p ${HAPPY_OUTPUT}
-echo "============== 2 end ============== "
-
-echo "============== 3 ============== "
-time sudo docker run -it -v /data/:/data/ \
-  pkrusche/hap.py /opt/hap.py/bin/hap.py \
-  ${TRUTH_VCF} \
-  ${FINAL_OUTPUT_VCF} \
-  -f ${CONFIDENT_BED} \
-  -r ${REF} \
-  -o ${HAPPY_OUTPUT}/deepvariant_hg001_grch37 \
-  --engine=vcfeval \
-  --threads=${N_SHARDS} \
-  -l 20:10000000-10010000
-  -l 19
-wait;
-echo "============== 3 end ============== "
+echo "DeepVariant pipeline finished please call happy_script"
