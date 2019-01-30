@@ -1,15 +1,12 @@
-# default args
+#!/bin/bash
 
-
+# setting default args
 TRUTH_VCF=""
 FINAL_OUTPUT_VCF=""
 CONFIDENT_BED=""
 REF="missing"
 HAPPY_OUTPUT=""
 N_SHARDS=32
-
-
-
 
 # handeling arguments
 for i in "$@"
@@ -63,14 +60,14 @@ case $i in
     *)
     UNKNOWN="${i}"
     echo "unknown symbol ${UNKNOWN}"
-  echo "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
-  [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
+    echo "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
+    [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
     exit 1
     ;;
 esac
 done
 
- 
+# checking for required arguments 
 if [ "$REF" = "missing" ]
 then
   echo "ref missing"
@@ -79,15 +76,9 @@ then
   exit 1
 fi
 
-
-
 # HAP.PY code
 sudo docker pull pkrusche/hap.py
-# TRUTH_VCF=/data/users/common/vcf/HG001_GRCh37.vcf.gz
-# CONFIDENT_BED=/data/users/common/bed/HG001_GRCh37.bed
-# HAPPY_OUTPUT=/data/users/mgaltier/deepvariant_outputs/happy_output/pfda_hg001_grch37
-# mkdir -p ${HAPPY_OUTPUT}
-
+mkdir -p ${HAPPY_OUTPUT}
 
 echo "============== 3 ============== "
 time sudo docker run -it -v  ${HOME}:${HOME} \

@@ -1,8 +1,6 @@
 #!/bin/bash
 
-
-
-# default args
+# setting default arguments
 BIN_VERSION="0.7.2"
 MODEL_VERSION="0.7.2"
 
@@ -13,8 +11,8 @@ LOGDIR=./deepvariant_outputs/logs
 REF="missing"
 BAM="missing"
 MODEL="missing"
+REGION="missing"
 
-REGION=""
 N_SHARDS=32
 RUN="gpu"
 SAMPLE_NAME="NA12878"
@@ -31,6 +29,8 @@ case $i in
       ref=<path_name> specifies reference, .fasta file
       bam=<path_name> specifies bam file, .bam file
       sample_name=<string> specifies which sample
+      region=<string> specifies region to run on
+          - defaults to \"\"
 
     OPTIONAL:
     specify output directories
@@ -45,9 +45,7 @@ case $i in
       --log_dir=<path_name> specifies the log directory
           - defaults to ./deepvariant_outputs/logs
       --threads=<int> specifies number of threads
-          - defaults to 32  
-      --region=<string> specifies region to run on
-          - defaults to \"\" 
+          - defaults to 32 
       gpu specifies to run using gpus (default setting)
       cpu specifies to run using cpu
     "
@@ -109,57 +107,50 @@ case $i in
     UNKNOWN="${i#*=}"
     echo "unknown symbol ${UNKNOWN}"
     echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
-          [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
-          [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] 
-          [--threads=<int>] [--region=<string>] [gpu || cpu]"
+      region=<string> [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
+      [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] [--threads=<int>]
+      [gpu || cpu]"
     exit 1
     ;;
 esac
 done
 
- 
-if [ $REF == 'missing' ] || [ $BAM == 'missing' ] || [ $MODEL == 'missing' ]
+# checking for required arguments 
+if [ "$REF" = "missing" ] || [ "$BAM" = "missing" ] || [ "$MODEL" = "missing" ] || [ "$REGION" = "missing" ]
 then
-  echo "bam, ref, or model missing"
+  echo "bam, ref, region, or model missing"
   echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
-    [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
-    [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] 
-    [--threads=<int>] [--region=<string>] [gpu || cpu]"
+    region=<string> [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
+    [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] [--threads=<int>]
+    [gpu || cpu]"
   exit 1
 fi
 
-
-
-REF_NAME="${basename ${REF}}"
+REF_NAME="${basename "${REF}"}"
 FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/{REF_NAME}
 
 echo "Starting DeepVariant with the following settings"
-echo "Bin version      = ${BIN_VERSION}"
-echo "Model version    = ${MODEL_VERSION}"
-echo "Output dir         = ${OUTPUT_DIR}"
-echo "VCF Output dir      = ${VCF_OUTPUT_DIR}"
+echo "Bin version             = ${BIN_VERSION}"
+echo "Model version           = ${MODEL_VERSION}"
+echo "Output dir              = ${OUTPUT_DIR}"
+echo "VCF Output dir          = ${VCF_OUTPUT_DIR}"
 echo "Final VCF Output dir    = ${FINAL_OUTPUT_VCF}"
-echo "Log dir            = ${LOGDIR}"
-echo "Region            = ${REGION}"
-echo "Reference      = ${REF}"
-echo "Bam        = ${BAM}"
-echo "Model        = ${MODEL}"
-echo "Threads         = ${N_SHARDS}"
-echo "GPU/CPU        = ${RUN}"
+echo "Log dir                 = ${LOGDIR}"
+echo "Region                  = ${REGION}"
+echo "Reference               = ${REF}"
+echo "Bam                     = ${BAM}"
+echo "Model                   = ${MODEL}"
+echo "Threads                 = ${N_SHARDS}"
+echo "GPU/CPU                 = ${RUN}"
 
-
+# initializing directories 
 mkdir -p ${OUTPUT_DIR}
 mkdir -p ${VCF_OUTPUT_DIR}
 mkdir -p ${LOGDIR}
 
-
-echo "============== docker pull ============== "
 sudo docker pull gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION}
 wait;
-echo "============== docker pull end ============== "
 
-
-echo "============== create image ============== "
 # create images
 time seq 0 $((N_SHARDS-1)) | \
   parallel --eta --halt 2 --joblog ${LOGDIR}/log --res ${LOGDIR} \
@@ -172,26 +163,24 @@ time seq 0 $((N_SHARDS-1)) | \
     --reads ${BAM} \
     --sample_name ${SAMPLE_NAME} \
     --examples ${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz \
-    --regions '"chr20:10,000,000-10,010,000"' \
+    --regions "${REGION}" \
     --task {}
 wait;
-echo "============== create image end ============== "
 
-echo "============== calling call variant output ============== "
-CALL_VARIANTS_OUTPUT=${OUTPUT_DIR}/call_variants_output.tfrecord.gz
+# call variants
+CALL_VARIANTS_OUTPUT="${OUTPUT_DIR}/call_variants_output.tfrecord.gz"
 wait;
 
 time sudo docker run \
   -v  ${HOME}:${HOME} \
   gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
   /opt/deepvariant/bin/call_variants \
- --outfile "${CALL_VARIANTS_OUTPUT}" \
- --examples "${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz" \
- --checkpoint "${MODEL}"
+  --outfile "${CALL_VARIANTS_OUTPUT}" \
+  --examples "${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz" \
+  --checkpoint "${MODEL}"
 wait;
-echo "============== calling call variant output end ============== "
 
-echo "============== 1 ============== "
+# postprocess variants
 time sudo docker run \
    -v  ${HOME}:${HOME} \
    gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
@@ -200,6 +189,5 @@ time sudo docker run \
    --infile "${CALL_VARIANTS_OUTPUT}" \
    --outfile $"{FINAL_OUTPUT_VCF}"
 wait;
-echo "============== 1 end ============== "
 
-echo "DeepVariant pipeline finished please call happy_script"
+echo "Call hap.py Script"
