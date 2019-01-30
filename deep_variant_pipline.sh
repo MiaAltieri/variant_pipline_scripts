@@ -126,8 +126,9 @@ then
   exit 1
 fi
 
-REF_NAME="${basename "${REF}"}"
-FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/{REF_NAME}
+REF_NAME="$(basename "${REF}")"
+echo "${REF_NAME}"
+FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/${REF_NAME}
 
 echo "Starting DeepVariant with the following settings"
 echo "Bin version             = ${BIN_VERSION}"
@@ -171,14 +172,27 @@ wait;
 CALL_VARIANTS_OUTPUT="${OUTPUT_DIR}/call_variants_output.tfrecord.gz"
 wait;
 
-time sudo docker run \
-  -v  ${HOME}:${HOME} \
-  gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
-  /opt/deepvariant/bin/call_variants \
-  --outfile "${CALL_VARIANTS_OUTPUT}" \
-  --examples "${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz" \
-  --checkpoint "${MODEL}"
-wait;
+# runs on GPUs unless CPU specified 
+if [ "$RUN" = "gpu" ]; then
+  time sudo nvidia-docker run \
+    -v /data/:/data/ \
+    gcr.io/deepvariant-docker/deepvariant_gpu:"${BIN_VERSION}" \
+    /opt/deepvariant/bin/call_variants \
+    --outfile "${CALL_VARIANTS_OUTPUT}" \
+    --examples "${OUTPUT_DIR}"/examples.tfrecord@"${N_SHARDS}".gz \
+    --checkpoint "${MODEL}"
+  wait;
+else
+  time sudo docker run \
+    -v  ${HOME}:${HOME} \
+    gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
+    /opt/deepvariant/bin/call_variants \
+    --outfile "${CALL_VARIANTS_OUTPUT}" \
+    --examples "${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz" \
+    --checkpoint "${MODEL}"
+  wait;
+fi
+
 
 # postprocess variants
 time sudo docker run \
