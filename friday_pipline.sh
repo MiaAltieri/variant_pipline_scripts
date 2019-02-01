@@ -145,7 +145,7 @@ time seq 0 $((N_SHARDS-1)) | time parallel --ungroup python3 ${FRIDAY_PATH}/gene
 --threads ${N_SHARDS} \
 --chromosome_name ${CHR_NAME} \
 --sample_name ${SAMPLE_NAME} \
---output_dir "${OUTPUT_DIR}" \
+--output_dir ${OUTPUT_DIR} \
 --thread_id {}
 wait;
 
