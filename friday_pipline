@@ -46,7 +46,7 @@ case $i in
 		   		- defaults to 1024
 		   	--num_workers=<int> specifies the number of workers
 		   		- defaults to 64
-		   	"
+	"
 		exit 1
 	;;
     --friday-location=*)
