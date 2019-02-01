@@ -3,7 +3,9 @@
 # setting default arguments
 BIN_VERSION="0.7.2"
 MODEL_VERSION="0.7.2"
-
+N_SHARDS=32
+RUN="gpu"
+SAMPLE_NAME="NA12878"
 OUTPUT_DIR=./deepvariant_outputs/
 VCF_OUTPUT_DIR=./deepvariant_outputs/vcf_outputs
 LOGDIR=./deepvariant_outputs/logs
@@ -13,9 +15,6 @@ BAM="missing"
 MODEL="missing"
 REGION="missing"
 
-N_SHARDS=32
-RUN="gpu"
-SAMPLE_NAME="NA12878"
 
 # handeling arguments
 for i in "$@"
@@ -106,7 +105,8 @@ case $i in
     *)
     UNKNOWN="${i#*=}"
     echo "unknown symbol ${UNKNOWN}"
-    echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
+    echo 
+    "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
       region=<string> [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
       [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] [--threads=<int>]
       [gpu || cpu]"
@@ -119,7 +119,8 @@ done
 if [ "$REF" = "missing" ] || [ "$BAM" = "missing" ] || [ "$MODEL" = "missing" ] || [ "$REGION" = "missing" ]
 then
   echo "bam, ref, region, or model missing"
-  echo "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
+  echo 
+  "usage: deep_variant_pipeline.sh [--help] model=<path_name> ref=<path_name> bam=<path_name>
     region=<string> [sample_name=<string>] [--bin_vs=<path_name>] [--model_vs=<path_name>] 
     [--output=<path_name>] [--output_vcf=<path_name>] [--log_dir=<path_name>] [--threads=<int>]
     [gpu || cpu]"
@@ -127,7 +128,6 @@ then
 fi
 
 REF_NAME="$(basename "${REF}")"
-echo "${REF_NAME}"
 FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/${REF_NAME}
 
 echo "Starting DeepVariant with the following settings"

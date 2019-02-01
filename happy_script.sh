@@ -60,8 +60,9 @@ case $i in
     *)
     UNKNOWN="${i}"
     echo "unknown symbol ${UNKNOWN}"
-    echo "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
-    [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
+    echo 
+    "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
+      [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
     exit 1
     ;;
 esac
@@ -71,8 +72,9 @@ done
 if [ "$REF" = "missing" ]
 then
   echo "ref missing"
-  echo "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
-  [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
+  echo 
+  "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
+    [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
   exit 1
 fi
 

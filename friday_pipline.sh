@@ -6,7 +6,6 @@ OUTPUT_DIR="./friday_outputs"
 VCF_OUTPUT_DIR="./friday_outputs/vcf_output"
 CHR_NAME="1-22,X,Y"
 GPU_MODE=1
-SAMPLE_NAME=""NA24385""
 N_SHARDS=32
 BATCH_SIZE=1024
 NUM_WORKERS=64
@@ -14,6 +13,7 @@ NUM_WORKERS=64
 REF="missing"
 BAM="missing"
 MODEL="missing"
+SAMPLE_NAME="missing"
 
 # handeling arguments
 for i in "$@"
@@ -103,23 +103,25 @@ case $i in
     ;;
     
     *)
-    echo "usage: friday_pipeline [--help] [--friday-location=<path_name>] [--output=<path_name>]
-                   [--output-vcf=<path_name>] [chr_name=<string>] [sample_name=<string>]
-                   [threads=<path_name>] [--batch_size=<int>] [--num_workers=<int>] ref=<path_name>
-                   bam=<path_name> model=<path_name> "
+    echo 
+    "usage: friday_pipeline [--help] ref=<path_name> bam=<path_name> model=<path_name> 
+        sample_name=<string> [--friday-location=<path_name>] [--output=<path_name>]
+        [--output-vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
+        [--batch_size=<int>] [--num_workers=<int>] "
     exit 1
     ;;
 esac
 done
 
 # checking for required arguments 
-if [ "$REF" = 'missing' ] || [ "$BAM" = 'missing' ] || [ "$MODEL" = 'missing' ]
+if [ "$REF" = 'missing' ] || [ "$BAM" = 'missing' ] || [ "$MODEL" = 'missing' ] || [ "$SAMPLE_NAME" = 'missing' ]
 then
-	echo "bam, ref, or model missing"
-    echo "usage: friday_pipeline [--help] [--friday-location=<path_name>] [--output=<path_name>]
-                   [--output-vcf=<path_name>] [chr_name=<string>] [sample_name=<string>]
-                   [threads=<path_name>] [--batch_size=<int>] [--num_workers=<int>] [--gpu_mode=<int>]
-                   ref=<path_name> bam=<path_name> model=<path_name> "
+	echo "bam, ref, model, or sample missing"
+    echo 
+    "usage: friday_pipeline [--help] ref=<path_name> bam=<path_name> model=<path_name> 
+        sample_name=<string> [--friday-location=<path_name>] [--output=<path_name>]
+        [--output-vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
+        [--batch_size=<int>] [--num_workers=<int>] "
     exit 1
 fi
 
@@ -140,13 +142,13 @@ echo "Number of workers 	= ${NUM_WORKERS}"
 
 # generate image
 time seq 0 $((N_SHARDS-1)) | time parallel --ungroup python3 ${FRIDAY_PATH}/generate_images.py \
---bam ${BAM} \
---fasta ${REF}\
---threads ${N_SHARDS} \
---chromosome_name ${CHR_NAME} \
---sample_name ${SAMPLE_NAME} \
---output_dir ${OUTPUT_DIR} \
---thread_id {}
+    --bam ${BAM} \
+    --fasta ${REF}\
+    --threads ${N_SHARDS} \
+    --chromosome_name ${CHR_NAME} \
+    --sample_name ${SAMPLE_NAME} \
+    --output_dir ${OUTPUT_DIR} \
+    --thread_id {}
 wait;
 
 # CSV PROCESSING
