@@ -76,11 +76,10 @@ then
   exit 1
 fi
 
-# HAP.PY code
+# hap.py code 
 sudo docker pull pkrusche/hap.py
 mkdir -p ${HAPPY_OUTPUT}
 
-echo "============== 3 ============== "
 time sudo docker run -it -v  ${HOME}:${HOME} \
   pkrusche/hap.py /opt/hap.py/bin/hap.py \
   ${TRUTH_VCF} \
@@ -92,4 +91,3 @@ time sudo docker run -it -v  ${HOME}:${HOME} \
   --threads=${N_SHARDS} \
   -l chr20:10000000-10010000
 wait;
-echo "============== 3 end ============== "
