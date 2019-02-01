@@ -112,7 +112,7 @@ case $i in
 esac
 done
 
- 
+# checking for required arguments 
 if [ "$REF" = 'missing' ] || [ "$BAM" = 'missing' ] || [ "$MODEL" = 'missing' ]
 then
 	echo "bam, ref, or model missing"
@@ -151,6 +151,7 @@ wait;
 
 # CSV PROCESSING
 # THIS IS EMBARASSING, NEED TO HANDLE THIS INSIDE IMAGE GENERATION :-(
+mkdir -p ${OUTPUT_DIR}
 cd ${OUTPUT_DIR}
 
 for i in `seq 1 22`;
@@ -174,3 +175,5 @@ time python3 call_variants.py \
 	--gpu_mode ${GPU_MODE} \
 	--output_dir ${VCF_OUTPUT_DIR}
 wait;
+
+echo "Call hap.py Script"
