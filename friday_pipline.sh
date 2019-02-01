@@ -1,15 +1,19 @@
 #!/bin/bash
 
-# default arguements
-FRIDAY="./software/friday"
-OUTPUT="./friday_outputs"
-OUTPUTVCF="./friday_outputs/vcf_output"
-CHRSTART=1
-CHREND=22
+# default arguments
+FRIDAY_PATH="./software/friday"
+OUTPUT_DIR="./friday_outputs"
+VCF_OUTPUT_DIR="./friday_outputs/vcf_output"
+CHR_NAME="1-22,X,Y"
+GPU_MODE=1
+SAMPLE_NAME=""NA24385""
+N_SHARDS=32
+BATCH_SIZE=1024
+NUM_WORKERS=64
+
 REF="missing"
 BAM="missing"
 MODEL="missing"
-THREADS=32
 
 # handeling arguments
 for i in "$@"
@@ -22,7 +26,7 @@ case $i in
 			model=<path_name> specifies model, .pkl file
 			ref=<path_name> specifies reference, .fasta file
 			bam=<path_name> specifies bam file, .bam file
-			sample-name=<string> specifies which sample
+			sample_name=<string> specifies which sample
 
 		OPTIONAL:
 		specify output directories
@@ -34,77 +38,141 @@ case $i in
 		   		- defaults to ./friday_outputs/vcf_output
 		   	--threads=<int> specifies number of threads
 		   		- defaults to 32	
-		   	--chromosome-start=<int> specifies the start chromosome
+		   	--chr_name=<int> specifies chromsomes to run on
+		   		- defaults to 1-22,X,Y
+		   	--gpu_mode=<int> specifies the gpu mode to run on
 		   		- defaults to 1
-		   	--chromosome-end=<int> specifies the start chromosome
-		   		- defaults to 22"
+		   	--batch_size=<int> specifies the batch size
+		   		- defaults to 1024
+		   	--num_workers=<int> specifies the number of workers
+		   		- defaults to 64
+	"
 		exit 1
 	;;
     --friday-location=*)
-    FRIDAY="${i#*=}"
-    shift # past argument=value
+    FRIDAY_PATH="${i#*=}"
+    shift
     ;;
     --output=*)
-    OUTPUT="${i#*=}"
-    shift # past argument=value
+    OUTPUT_DIR="${i#*=}"
+    shift
     ;;
     --output-vcf=*)
-    OUTPUTVCF="${i#*=}"
-    shift # past argument=value
+    VCF_OUTPUT_DIR="${i#*=}"
+    shift
     ;;
-    --chromosome-start=*)
-    CHRSTART="${i#*=}"
-    shift # past argument=value
+    --chr_name=*)
+    CHR_NAME="${i#*=}"
+    shift
     ;;
-    --chromosome-end=*)
-    CHREND="${i#*=}"
-    shift # past argument=value
+    --gpu_mode=*)
+    GPU_MODE="${i#*=}"
+    shift
+    ;;
+    --sample_name=*)
+    SAMPLE_NAME="${i#*=}"
+    shift
+    ;;
+    --batch_size=*)
+    BATCH_SIZE="${i#*=}"
+    shift
+    ;;
+    --num_workers=*)
+    NUM_WORKERS="${i#*=}"
+    shift
     ;;
     ref=*)
     REF="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     bam=*)
     BAM="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
    	model=*)
     MODEL="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     threads=*)
-    THREADS="${i#*=}"
-    shift # past argument=value
+    N_SHARDS="${i#*=}"
+    shift 
     ;;
-    # any other argument
+    GPU*)
+    RUN="${i#*=}"
+    shift 
+    ;;
+    
     *)
     echo "usage: friday_pipeline [--help] [--friday-location=<path_name>] [--output=<path_name>]
-                   [--output-vcf=<path_name>] [--chromosome-start=<int>] 
-                   [--chromosome-end=<int>] ref=<path_name> bam=<path_name>
-                   model=<path_name> threads=<path_name>"
+                   [--output-vcf=<path_name>] [chr_name=<string>] [sample_name=<string>]
+                   [threads=<path_name>] [--batch_size=<int>] [--num_workers=<int>] ref=<path_name>
+                   bam=<path_name> model=<path_name> "
     exit 1
     ;;
 esac
 done
 
- 
-if [ $REF == 'missing' ] || [ $BAM == 'missing' ] || [ $MODEL == 'missing' ]
+# checking for required arguments 
+if [ "$REF" = 'missing' ] || [ "$BAM" = 'missing' ] || [ "$MODEL" = 'missing' ]
 then
 	echo "bam, ref, or model missing"
     echo "usage: friday_pipeline [--help] [--friday-location=<path_name>] [--output=<path_name>]
-               [--output-vcf=<path_name>] [--chromosome-start=<int>] 
-               [--chromosome-end=<int>] ref=<path_name> bam=<path_name>
-               model=<path_name> threads=<path_name>"
+                   [--output-vcf=<path_name>] [chr_name=<string>] [sample_name=<string>]
+                   [threads=<path_name>] [--batch_size=<int>] [--num_workers=<int>] [--gpu_mode=<int>]
+                   ref=<path_name> bam=<path_name> model=<path_name> "
     exit 1
 fi
 
-echo "Starting Friday with the following settings"
-echo "FRIDAY location 	= ${FRIDAY}"
-echo "Output dir     		= ${OUTPUT}"
-echo "VCF Output dir 		= ${OUTPUTVCF}"
-echo "Starting chromosome 	= ${CHRSTART}"
-echo "Ending chromosome 	= ${CHREND}"
-echo "Reference		= ${REF}"
-echo "Model			= ${MODEL}"
-echo "Threads			= ${THREADS}"
+echo "Starting Friday with the following settings:"
+echo "FRIDAY location 		= ${FRIDAY_PATH}"
+echo "Output dir     		= ${OUTPUT_DIR}"
+echo "VCF Output dir 		= ${VCF_OUTPUT_DIR}"
+echo "Chromosome regions 	= ${CHR_NAME}"
+echo "Reference				= ${REF}"
+echo "Model					= ${MODEL}"
+echo "Threads				= ${N_SHARDS}"
+echo "GPU mode 				= ${GPU_MODE}"
+echo "Sample name 			= ${SAMPLE_NAME}"
+echo "Threads 				= ${N_SHARDS}"
+echo "Batch size 			= ${BATCH_SIZE}"
+echo "Number of workers 	= ${NUM_WORKERS}"
 
+
+# generate image
+time seq 0 $((N_SHARDS-1)) | time parallel --ungroup python3 ${FRIDAY_PATH}/generate_images.py \
+--bam ${BAM} \
+--fasta ${REF}\
+--threads ${N_SHARDS} \
+--chromosome_name ${CHR_NAME} \
+--sample_name ${SAMPLE_NAME} \
+--output_dir ${OUTPUT_DIR} \
+--thread_id {}
+wait;
+
+# CSV PROCESSING
+# THIS IS EMBARASSING, NEED TO HANDLE THIS INSIDE IMAGE GENERATION :-(
+cd ${OUTPUT_DIR}
+
+for i in `seq 1 22`;
+do
+  cat ${i}_*.csv > ${i}.csv
+done
+cat X_* > X.csv
+cat Y_* > Y.csv
+rm -rf X_*
+rm -rf Y_*
+wait;
+
+# variant calling
+time python3 call_variants.py \
+	--csv_dir ${OUTPUT_DIR} \
+	--bam_file ${BAM} \
+	--chromosome_name ${CHR_NAME} \
+	--batch_size ${BATCH_SIZE} \
+	--num_workers ${NUM_WORKERS} \
+	--model_path ${MODEL} \
+	--gpu_mode ${GPU_MODE} \
+	--output_dir ${VCF_OUTPUT_DIR}
+wait;
+
+echo "Call hap.py Script"
