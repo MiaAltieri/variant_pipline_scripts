@@ -22,7 +22,7 @@ case $i in
     specify output directories
       --truth_vcf=<path_name> specifies the truth vcf directory
           - defaults to 
-      --final_ouput_vcf=<path_name> specifies the final output vcf directory 
+      --final_output_vcf=<path_name> specifies the final output vcf directory 
           - defaults to 
       --confident_bed=<path_name> specifies the confident bed directory 
           - defaults to 
@@ -41,7 +41,7 @@ case $i in
     TRUTH_VCF="${i#*=}"
     shift
     ;;
-    --final_ouput_vcf=*)
+    --final_output_vcf=*)
     FINAL_OUTPUT_VCF="${i#*=}"
     shift
     ;;
@@ -61,7 +61,7 @@ case $i in
     UNKNOWN="${i}"
     echo "unknown symbol ${UNKNOWN}"
     echo 
-    "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
+    "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_output_vcf=<path_name>]
       [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
     exit 1
     ;;
@@ -73,7 +73,7 @@ if [ "$REF" = "missing" ]
 then
   echo "ref missing"
   echo 
-  "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_ouput_vcf=<path_name>]
+  "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_output_vcf=<path_name>]
     [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
   exit 1
 fi
