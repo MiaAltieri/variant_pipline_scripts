@@ -82,14 +82,14 @@ fi
 sudo docker pull pkrusche/hap.py
 mkdir -p ${HAPPY_OUTPUT}
 
-time sudo docker run -it -v  ${HOME}:${HOME} \
+time sudo docker run -it -v  /data/:/data/ \
   pkrusche/hap.py /opt/hap.py/bin/hap.py \
   ${TRUTH_VCF} \
   "${FINAL_OUTPUT_VCF}" \
-  -f ${CONFIDENT_BED} \
+  -f "${CONFIDENT_BED}" \
   -r "${REF}" \
-  -o "${HAPPY_OUTPUT}" \
+  -o "${HAPPY_OUTPUT}/chr20" \
   --engine=vcfeval \
   --threads=${N_SHARDS} \
-  -l chr20:10000000-10010000
+  -l 20:10000000-10010000
 wait;

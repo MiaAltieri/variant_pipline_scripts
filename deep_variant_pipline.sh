@@ -156,7 +156,7 @@ wait;
 time seq 0 $((N_SHARDS-1)) | \
   parallel --eta --halt 2 --joblog ${LOGDIR}/log --res ${LOGDIR} \
   sudo docker run \
-    -v  ${HOME}:${HOME}    \
+    -v  /data/:/data/    \
     gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION} \
     /opt/deepvariant/bin/make_examples \
     --mode calling \
@@ -184,7 +184,7 @@ if [ "$RUN" = "gpu" ]; then
   wait;
 else
   time sudo docker run \
-    -v  ${HOME}:${HOME} \
+    -v  /data/:/data/ \
     gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
     /opt/deepvariant/bin/call_variants \
     --outfile "${CALL_VARIANTS_OUTPUT}" \
@@ -196,12 +196,12 @@ fi
 
 # postprocess variants
 time sudo docker run \
-   -v  ${HOME}:${HOME} \
+   -v /data/:/data/ \
    gcr.io/deepvariant-docker/deepvariant:"${BIN_VERSION}" \
    /opt/deepvariant/bin/postprocess_variants \
    --ref "${REF}" \
    --infile "${CALL_VARIANTS_OUTPUT}" \
-   --outfile $"{FINAL_OUTPUT_VCF}"
+   --outfile "${FINAL_OUTPUT_VCF}"
 wait;
 
 echo "Call hap.py Script"
