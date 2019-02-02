@@ -123,7 +123,7 @@ then
   exit 1
 fi
 
-REF_NAME="$(basename "${REF}" .fasta)"
+REF_NAME="$(basename "${BAM}" .fasta)"
 FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/${REF_NAME}.vcf.gz
 
 echo "Starting DeepVariant with the following settings"
