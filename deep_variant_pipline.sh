@@ -124,7 +124,7 @@ then
 fi
 
 REF_NAME="$(basename "${REF}" .fasta)"
-FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/${REF_NAME}.vcf/gz
+FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/${REF_NAME}.vcf.gz
 
 echo "Starting DeepVariant with the following settings"
 echo "Bin version             = ${BIN_VERSION}"
