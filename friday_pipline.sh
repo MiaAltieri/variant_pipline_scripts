@@ -6,9 +6,8 @@ OUTPUT_DIR="./friday_outputs"
 VCF_OUTPUT_DIR="./friday_outputs/vcf_output"
 CHR_NAME="1-22,X,Y"
 GPU_MODE=1
-N_SHARDS=32
+N_SHARDS=64
 BATCH_SIZE=1024
-NUM_WORKERS=64
 
 REF="missing"
 BAM="missing"
@@ -30,11 +29,11 @@ case $i in
 
 		OPTIONAL:
 		specify output directories
-			--friday-location=<path_name> specifies where friday is stored on your computer
+			--friday_location=<path_name> specifies where friday is stored on your computer
 		   		- assumes ./software/friday	
 			--output=<path_name> specifies the output directory 
 		   		- defaults to ./friday_outputs
-		   	--output-vcf=<path_name> specifies the output directory for vcf file 
+		   	--output_vcf=<path_name> specifies the output directory for vcf file 
 		   		- defaults to ./friday_outputs/vcf_output
 		   	--threads=<int> specifies number of threads
 		   		- defaults to 32	
@@ -44,12 +43,10 @@ case $i in
 		   		- defaults to 1
 		   	--batch_size=<int> specifies the batch size
 		   		- defaults to 1024
-		   	--num_workers=<int> specifies the number of workers
-		   		- defaults to 64
 	"
 		exit 1
 	;;
-    --friday-location=*)
+    --friday_location=*)
     FRIDAY_PATH="${i#*=}"
     shift
     ;;
@@ -57,7 +54,7 @@ case $i in
     OUTPUT_DIR="${i#*=}"
     shift
     ;;
-    --output-vcf=*)
+    --output_vcf=*)
     VCF_OUTPUT_DIR="${i#*=}"
     shift
     ;;
@@ -75,10 +72,6 @@ case $i in
     ;;
     --batch_size=*)
     BATCH_SIZE="${i#*=}"
-    shift
-    ;;
-    --num_workers=*)
-    NUM_WORKERS="${i#*=}"
     shift
     ;;
     ref=*)
@@ -105,9 +98,9 @@ case $i in
     *)
     echo 
     "usage: friday_pipeline [--help] ref=<path_name> bam=<path_name> model=<path_name> 
-        sample_name=<string> [--friday-location=<path_name>] [--output=<path_name>]
-        [--output-vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
-        [--batch_size=<int>] [--num_workers=<int>] "
+        sample_name=<string> [--friday_location=<path_name>] [--output=<path_name>]
+        [--output_vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
+        [--batch_size=<int>]"
     exit 1
     ;;
 esac
@@ -119,9 +112,9 @@ then
 	echo "bam, ref, model, or sample missing"
     echo 
     "usage: friday_pipeline [--help] ref=<path_name> bam=<path_name> model=<path_name> 
-        sample_name=<string> [--friday-location=<path_name>] [--output=<path_name>]
-        [--output-vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
-        [--batch_size=<int>] [--num_workers=<int>] "
+        sample_name=<string> [--friday_location=<path_name>] [--output=<path_name>]
+        [--output_vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
+        [--batch_size=<int>]"
     exit 1
 fi
 
@@ -137,7 +130,6 @@ echo "GPU mode 				= ${GPU_MODE}"
 echo "Sample name 			= ${SAMPLE_NAME}"
 echo "Threads 				= ${N_SHARDS}"
 echo "Batch size 			= ${BATCH_SIZE}"
-echo "Number of workers 	= ${NUM_WORKERS}"
 
 
 # generate image
@@ -172,7 +164,7 @@ time python3 call_variants.py \
 	--bam_file ${BAM} \
 	--chromosome_name ${CHR_NAME} \
 	--batch_size ${BATCH_SIZE} \
-	--num_workers ${NUM_WORKERS} \
+	--num_workers ${N_SHARDS} \
 	--model_path ${MODEL} \
 	--gpu_mode ${GPU_MODE} \
 	--output_dir ${VCF_OUTPUT_DIR}
