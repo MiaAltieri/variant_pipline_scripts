@@ -8,6 +8,7 @@ CHR_NAME="1-22,X,Y"
 GPU_MODE=1
 N_SHARDS=64
 BATCH_SIZE=1024
+DOWNLOAD_FRIDAY="no"
 
 REF="missing"
 BAM="missing"
@@ -43,6 +44,8 @@ case $i in
 		   		- defaults to 1
 		   	--batch_size=<int> specifies the batch size
 		   		- defaults to 1024
+            --download_friday=<yes|no> specifies whether or not to download and build friday
+                - \"no\"
 	"
 		exit 1
 	;;
@@ -90,8 +93,8 @@ case $i in
     N_SHARDS="${i#*=}"
     shift 
     ;;
-    GPU*)
-    RUN="${i#*=}"
+    --download_friday=*)
+    DOWNLOAD_FRIDAY="${i#*=}"
     shift 
     ;;
     
@@ -100,7 +103,7 @@ case $i in
     "usage: friday_pipeline [--help] ref=<path_name> bam=<path_name> model=<path_name> 
         sample_name=<string> [--friday_location=<path_name>] [--output=<path_name>]
         [--output_vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
-        [--batch_size=<int>]"
+        [--batch_size=<int>] [--download_friday=<yes|no>]"
     exit 1
     ;;
 esac
@@ -114,7 +117,7 @@ then
     "usage: friday_pipeline [--help] ref=<path_name> bam=<path_name> model=<path_name> 
         sample_name=<string> [--friday_location=<path_name>] [--output=<path_name>]
         [--output_vcf=<path_name>] [chr_name=<string>] [threads=<path_name>] 
-        [--batch_size=<int>]"
+        [--batch_size=<int>] [--download_friday=<yes|no>]"
     exit 1
 fi
 
@@ -130,6 +133,33 @@ echo "GPU mode 				= ${GPU_MODE}"
 echo "Sample name 			= ${SAMPLE_NAME}"
 echo "Threads 				= ${N_SHARDS}"
 echo "Batch size 			= ${BATCH_SIZE}"
+echo "Download FRIDAY       = ${DOWNLOAD_FRIDAY}"
+
+
+if [ "$DOWNLOAD_FRIDAY" = 'true' ]; then
+    # set up cmake
+    wget --no-check-certificate https://cmake.org/files/v3.12/cmake-3.12.0-Linux-x86_64.tar.gz
+    tar -xvf cmake-3.12.0-Linux-x86_64.tar.gz
+    mv cmake-3.12.0-Linux-x86_64 cmake-install
+    PATH=$(pwd)/cmake-install:$(pwd)/cmake-install/bin:$PATH
+    # check cmake version to be 3.12
+    cmake --version
+
+    # considering python3 is installed
+    # htslib dependencies
+    sudo apt-get install python3-dev gcc g++ make autoconf python3-pip libcurl4-openssl-dev
+    sudo apt-get install autoconf automake make gcc perl zlib1g-dev libbz2-dev liblzma-dev libcurl4-gnutls-dev libssl-dev
+    python3 -m pip install h5py graphviz pandas
+
+    # install the proper version of pytorch from https://pytorch.org/
+    git clone https://github.com/kishwarshafin/friday.git
+    cd friday
+    ./build.sh
+fi
+
+
+
+
 
 
 # generate image
