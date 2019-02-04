@@ -123,7 +123,7 @@ then
   exit 1
 fi
 
-REF_NAME="$(basename "${BAM}" .fasta)"
+REF_NAME="$(basename "${BAM}" .bam)"
 FINAL_OUTPUT_VCF=${VCF_OUTPUT_DIR}/${REF_NAME}.vcf.gz
 
 echo "Starting DeepVariant with the following settings"
@@ -138,7 +138,7 @@ echo "Bam                     = ${BAM}"
 echo "Model                   = ${MODEL}"
 echo "Threads                 = ${N_SHARDS}"
 echo "Mode                    = ${MODE}"
-echo "Mount point             = ${MODE}"
+echo "Mount point             = ${MOUNT}"
 
 # initializing directories 
 mkdir -p ${OUTPUT_DIR}
