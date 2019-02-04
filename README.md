@@ -57,3 +57,4 @@ bash happy_script.sh  \
 -To get an idea of how to run the FRIDAY pipeline, we suggest you follow the instructions below
 
 
+

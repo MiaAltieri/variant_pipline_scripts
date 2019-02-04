@@ -7,6 +7,7 @@ CONFIDENT_BED=""
 REF="missing"
 HAPPY_OUTPUT=""
 N_SHARDS=32
+REGION="none"
 
 # handeling arguments
 for i in "$@"
@@ -28,6 +29,8 @@ case $i in
           - defaults to 
       --happy_output=<path_name> specifies the output directory for hap.py 
           - defaults to ./friday_outputs/vcf_output
+      --region=<string> specifies region to run on
+          - defaults to \"none\"
       --threads=<int> specifies number of threads
           - defaults to 32 
     "
@@ -53,6 +56,10 @@ case $i in
     HAPPY_OUTPUT="${i#*=}"
     shift
     ;;
+    --region=*)
+    REGION="${i#*=}"
+    shift 
+    ;;
     --threads=*)
     N_SHARDS="${i#*=}"
     shift 
@@ -62,7 +69,7 @@ case $i in
     echo "unknown symbol ${UNKNOWN}"
     echo 
     "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_output_vcf=<path_name>]
-      [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
+      [--confident_bed=<path_name>] [--happy_output=<path_name>] [--region=<string>] [--threads=<int>]"
     exit 1
     ;;
 esac
@@ -74,7 +81,7 @@ then
   echo "ref missing"
   echo 
   "usage: happy_script.sh [--help] ref=<path_name> [--truth_vcf=<path_name>] [--final_output_vcf=<path_name>]
-    [--confident_bed=<path_name>] [--happy_output=<path_name>] [--threads=<int>]"
+    [--confident_bed=<path_name>] [--happy_output=<path_name>] [--region=<string>] [--threads=<int>]"
   exit 1
 fi
 
@@ -82,14 +89,26 @@ fi
 sudo docker pull pkrusche/hap.py
 mkdir -p ${HAPPY_OUTPUT}
 
-time sudo docker run -it -v  /data/:/data/ \
-  pkrusche/hap.py /opt/hap.py/bin/hap.py \
-  ${TRUTH_VCF} \
-  "${FINAL_OUTPUT_VCF}" \
-  -f "${CONFIDENT_BED}" \
-  -r "${REF}" \
-  -o "${HAPPY_OUTPUT}/chr20" \
-  --engine=vcfeval \
-  --threads=${N_SHARDS} \
-  -l 20:10000000-10010000
+if [ "$REGION" = "none" ]; then
+  time sudo docker run -it -v  /data/:/data/ \
+    pkrusche/hap.py /opt/hap.py/bin/hap.py \
+    ${TRUTH_VCF} \
+    "${FINAL_OUTPUT_VCF}" \
+    -f "${CONFIDENT_BED}" \
+    -r "${REF}" \
+    -o "${HAPPY_OUTPUT}/chr20" \
+    --engine=vcfeval \
+    --threads=${N_SHARDS} \
+else 
+  time sudo docker run -it -v  /data/:/data/ \
+    pkrusche/hap.py /opt/hap.py/bin/hap.py \
+    ${TRUTH_VCF} \
+    "${FINAL_OUTPUT_VCF}" \
+    -f "${CONFIDENT_BED}" \
+    -r "${REF}" \
+    -o "${HAPPY_OUTPUT}/chr20" \
+    --engine=vcfeval \
+    --threads=${N_SHARDS} \
+    -l "${REGION}"
+fi
 wait;
